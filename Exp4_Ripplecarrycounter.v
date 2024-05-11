@@ -1,28 +1,26 @@
-module ripple_carry_counter(q, clk, reset);
-output [3:0] q;
-input clk, reset;
-T_FF tff0(q[0], clk, reset);
-T_FF tff1(q[1], q[0], reset);
-T_FF tff2(q[2], q[1], reset);
-T_FF tff3(q[3], q[2], reset);
+module jkff(j,k,clock,reset,q,qb);
+input j,k,clock,reset;
+output reg q,qb;
+always@(negedge clock)
+begin
+case({reset,j,k})
+3'b100 :q=q;
+3'b101 :q=0;
+3'b110 :q=1;
+3'b111 :q=~q;
+default :q=0;
+endcase
+qb<=~q;
+end
+endmodule
+module rcacount(j,k,clock,reset,q,qb);
+input j,k,clock,reset;
+output wire [3:0]q,qb;
+jkff JK1(j,k,clock,reset,q[0],qb[0]);
+jkff JK2(j,k,q[0],reset,q[1],qb[1]);
+jkff JK3(j,k,q[1],reset,q[2],qb[2]);
+jkff JK4(j,k,q[2],reset,q[3],qb[3]);
 endmodule
 
-module T_FF(q, clk, reset);
-output q;
-input clk, reset;
-wire d;
-D_FF dff0(q, d, clk, reset);
-not n1(d, q); 
-endmodule
 
-module D_FF(q, d, clk, reset);
-output q;
-input d, clk, reset;
-reg q;
-always @(posedge reset or negedge clk)
-if (reset)
-q = 1'b0;
-else
-q = d;
-endmodule
 
